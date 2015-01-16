@@ -174,7 +174,7 @@ Namespace Networking
             state.TotalBytesToRead = CInt(System.Text.UTF8Encoding.UTF8.GetString(state.LengthBuffer))
             Debug.Print("Got Msg Body Length of " & state.TotalBytesToRead)
             ' Begin receiving the data from the remote device.
-            client.BeginReceive(state.buffer, 0, StateObject.BufferSize - 1, 0, New AsyncCallback(AddressOf ReceiveCallback), state)
+            client.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0, New AsyncCallback(AddressOf ReceiveCallback), state)
         End Sub
         Private Sub ReceiveCallback(ar As IAsyncResult)
             ' Retrieve the state object and the client socket 

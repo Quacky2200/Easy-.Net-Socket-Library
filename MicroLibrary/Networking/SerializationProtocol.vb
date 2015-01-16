@@ -16,6 +16,9 @@ Namespace Networking
 
     End Interface
 
+    ''' <summary>
+    ''' The JSON serialization engine is slower than MessagePack, but supports a wider range of objects.
+    ''' </summary>
     Public Class JsonSerializerEngine
         Implements ISerializationProtocol
 
@@ -36,6 +39,10 @@ Namespace Networking
         End Function
     End Class
 
+    ''' <summary>
+    ''' The Message Pack Serializer is faster and slimmer than JSON, but not without limitations. 
+    ''' https://github.com/msgpack/msgpack/blob/master/spec.md#limitation
+    ''' </summary>
     Public Class MessagePackSerializerEngine
         Implements ISerializationProtocol
 
@@ -43,7 +50,7 @@ Namespace Networking
 
         Private Function ISerializationProtocol_Serialize(Obj As Object) As Byte() Implements ISerializationProtocol.Serialize
             Dim WrapperObject As New DeserializationWrapper(Obj)
-            serializer.PackSingleObject(WrapperObject)
+            Return serializer.PackSingleObject(WrapperObject)
         End Function
 
         Public Function Deserialize(Data As Byte()) As Object Implements ISerializationProtocol.Deserialize
@@ -56,9 +63,6 @@ Namespace Networking
             Return MsgPackObj(PropertyIndex).ToObject
         End Function
 
-        Private Function PackObject(obj As Object) As Object
-
-        End Function
     End Class
 
     <Serializable>
@@ -82,12 +86,8 @@ Namespace Networking
             DeserializationWrapper.IterateProperties(instance,
             Sub(p, i)
                 If p.CanWrite Then
-                    Try
-                        Dim v = sender.GetPropertyValue(p.Name, i, Data)
-                        p.SetValue(instance, v, Nothing)
-                    Catch ex As Exception
-
-                    End Try
+                    Dim v = sender.GetPropertyValue(p.Name, i, Data)
+                    p.SetValue(instance, v, Nothing)
                 End If
             End Sub)
 
@@ -106,6 +106,5 @@ Namespace Networking
         End Sub
 
     End Class
-
 
 End Namespace
