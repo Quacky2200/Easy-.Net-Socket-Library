@@ -6,7 +6,7 @@ Namespace Networking.Client
     ''' An easy to use, multithreaded TCP client
     ''' </summary>
     ''' <remarks></remarks>
-    Public Class ClientTCPSocket
+    Public Class TcpClient
         Inherits BaseTCPSocket
         Public Event OnConnected(Sender As Socket)
         ''' <summary>
@@ -40,7 +40,7 @@ Namespace Networking.Client
                 Catch
                 End Try
                 If BaseSocket.Connected Then
-                    Receive(MyBase.BaseSocket)
+                    Receive(BaseSocket)
                     RaiseEvent OnConnected(BaseSocket)
                     Exit For
                 End If
@@ -54,9 +54,6 @@ Namespace Networking.Client
         End Sub
         Public Overloads Async Function SendTask(Obj As Object) As Task(Of Integer)
             Return Await SendTask(BaseSocket, Obj)
-        End Function
-        Public Overloads Async Function ReceiveTask() As Task(Of Object)
-            Return Await ReceiveTask(BaseSocket)
         End Function
 
     End Class

@@ -18,52 +18,10 @@ Namespace Networking
 #Region ".NET 4.5 Task Implementation"
 
         Friend Function SendTask(sender As Socket, Obj As Object) As Task(Of Integer)
-            Dim t As New TaskCompletionSource(Of Integer)()
-
-            Try
-                Dim Data As Byte() = PrepareSend(Protocol.Serialize(Obj))
-                t.SetResult(sender.Send(Data, 0, Data.Length, SocketFlags.None))
-            Catch ex As Exception
-                sender.Close()
-                t.SetException(ex)
-            End Try
-
-            Return t.Task
-        End Function
-
-        Friend Function ReceiveTask(sender As Socket) As Task(Of Object)
-            Dim t As New TaskCompletionSource(Of Object)()
-
-            Dim Buffer As New List(Of Byte)
-
-            While True
-                Try
-
-                    Dim arrivedbytes As Integer = -1
-                    Dim bytes(2048) As Byte
-                    Do
-                        arrivedbytes = sender.Receive(bytes)
-                        Buffer.InsertRange(Buffer.Count, bytes.ToList.GetRange(0, arrivedbytes))
-                    Loop While arrivedbytes > 0
-
-                    Dim data As Object = Protocol.Deserialize(Buffer.ToArray)
-                    If Not IsNothing(data) Then
-                        t.SetResult(data)
-                    End If
-                Catch SocketError As SocketException
-                    t.SetException(SocketError)
-                    Exit While
-                Catch e As Threading.ThreadAbortException
-                    Exit While
-                Catch ex As Exception
-                    t.SetException(ex)
-                End Try
-            End While
-
-            CloseSocket(sender)
-            Buffer.Clear()
-
-            Return t.Task
+            Dim Data As Byte() = PrepareSend(Protocol.Serialize(Obj))
+            Dim t As Task(Of Integer) = Task.Run(Of Integer)(Function() sender.Send(Data, 0, Data.Length, SocketFlags.None))
+            t.Wait()
+            Return t
         End Function
 
 #End Region
@@ -82,6 +40,8 @@ Namespace Networking
         Public Sub New(Protocol As ISerializationProtocol, Optional Port As Integer = 0)
             Me._Port = Port
             BaseSocket = New Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp)
+            BaseSocket.ReceiveTimeout = -1
+            BaseSocket.SendTimeout = -1
             Try
                 Bind(Port)
             Catch ex As SocketException
@@ -210,10 +170,11 @@ Namespace Networking
 
             ' Read the length of the body.
             Dim bytesRead As Integer = client.EndReceive(ar)
+            state.TotalBytesRead += bytesRead + 1
             state.TotalBytesToRead = CInt(System.Text.UTF8Encoding.UTF8.GetString(state.LengthBuffer))
-
+            Debug.Print("Got Msg Body Length of " & state.TotalBytesToRead)
             ' Begin receiving the data from the remote device.
-            client.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0, New AsyncCallback(AddressOf ReceiveCallback), state)
+            client.BeginReceive(state.buffer, 0, StateObject.BufferSize - 1, 0, New AsyncCallback(AddressOf ReceiveCallback), state)
         End Sub
         Private Sub ReceiveCallback(ar As IAsyncResult)
             ' Retrieve the state object and the client socket 
@@ -229,27 +190,47 @@ Namespace Networking
             state.TotalBytesRead += bytesRead
 
             ' Check if we need more data or have finished the transfer.
-            If state.TotalBytesRead < state.TotalBytesToRead Then
+            Dim Difference As Integer = state.TotalBytesToRead - state.TotalBytesRead
+            If Difference < StateObject.BufferSize Then
+                ' Done After Next Receive.
+                client.BeginReceive(state.buffer, 0, Difference + 1, 0, New AsyncCallback(AddressOf FinishReceiveCallback), state)
+            Else
                 ' Get the rest of the data.
                 client.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0, New AsyncCallback(AddressOf ReceiveCallback), state)
-            ElseIf state.TotalBytesRead = state.TotalBytesToRead Then
-                ' All the data has arrived; put it in response.
-                Dim data As Object = Protocol.Deserialize(state.ObjectData.GetRange(0, state.TotalBytesRead).ToArray)
-                If Not IsNothing(data) Then
-                    state.ObjectData.Clear()
-                    state.buffer = Nothing
-                    RaiseEvent OnReceive(client, data, state.TotalBytesRead)
-                End If
-                state.TotalBytesToRead = 0
-                state.TotalBytesRead = 0
-
-                state.buffer = New Byte(StateObject.BufferSize) {}
-                state.LengthBuffer = New Byte(StateObject.LengthBufferSize) {}
-                state.ObjectData.Clear()
-                Receive(client)
             End If
 
         End Sub 'ReceiveCallback
+
+        Private Sub FinishReceiveCallback(ByVal ar As IAsyncResult)
+
+            ' Retrieve the state object and the client socket 
+            ' from the asynchronous state object.
+            Dim state As StateObject = CType(ar.AsyncState, StateObject)
+            Dim client As Socket = state.workSocket
+
+            ' Read data from the remote device.
+            Dim bytesRead As Integer = client.EndReceive(ar)
+
+            ' Add temporary buffer data to final output buffer.
+            state.ObjectData.AddRange(state.buffer.ToList.GetRange(0, bytesRead))
+            state.TotalBytesRead += bytesRead
+
+            Dim data As Object = Protocol.Deserialize(state.ObjectData.ToArray)
+            If Not IsNothing(data) Then
+                RaiseEvent OnReceive(client, data, state.TotalBytesRead - 1)
+            End If
+
+            ' Clean Up
+            state.TotalBytesToRead = 0
+            state.TotalBytesRead = 0
+            state.buffer = New Byte(StateObject.BufferSize - 1) {}
+            state.LengthBuffer = New Byte(StateObject.LengthBufferSize - 1) {}
+            state.ObjectData.Clear()
+            state = Nothing
+
+            Receive(client)
+
+        End Sub
         Private Sub SendCallBack(ByVal ar As IAsyncResult)
             ' Retrieve the socket from the state object.
             Dim client As Socket = CType(ar.AsyncState, Socket)
@@ -278,7 +259,7 @@ Namespace Networking
         Private Function PrepareSend(Data As Byte()) As Byte()
             Dim LengthString As String = (Data.Length + StateObject.LengthBufferSize).ToString("D9")
             Dim LengthBytes As Byte() = System.Text.UTF8Encoding.UTF8.GetBytes(LengthString)
-            Dim merged = New Byte(LengthBytes.Length + (Data.Length - 1)) {}
+            Dim merged = New Byte(LengthBytes.Length + Data.Length - 1) {}
             LengthBytes.CopyTo(merged, 0)
             Data.CopyTo(merged, LengthBytes.Length)
             Return merged
@@ -288,6 +269,9 @@ Namespace Networking
             s.Close()
         End Sub
 
+        Private Sub BaseTCPSocket_OnError(sender As Socket, e As Exception) Handles Me.OnError
+
+        End Sub
     End Class
     Public Class StateObject
         ' Client socket.
@@ -298,8 +282,8 @@ Namespace Networking
         Public TotalBytesRead As Integer = 0
         Public TotalBytesToRead As Integer = 0
         ' Receive buffer.
-        Public buffer(BufferSize) As Byte
-        Public LengthBuffer(LengthBufferSize) As Byte
+        Public buffer(BufferSize - 1) As Byte
+        Public LengthBuffer(LengthBufferSize - 1) As Byte
         Public ObjectData As New List(Of Byte)
     End Class 'StateObject
 

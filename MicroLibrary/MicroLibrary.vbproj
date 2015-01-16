@@ -55,6 +55,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Data.Linq" />
     <Reference Include="System.Deployment" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Net" />
@@ -96,10 +97,9 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <Compile Include="Networking\Client\ClientTCPSocket.vb" />
-    <Compile Include="Networking\Serialization.vb" />
+    <Compile Include="Networking\Client\TcpClient.vb" />
     <Compile Include="Networking\SerializationProtocol.vb" />
-    <Compile Include="Networking\Server\ServerTCPSocket.vb" />
+    <Compile Include="Networking\Server\TcpServer.vb" />
     <Compile Include="Networking\Server\ServerUDPSocket.vb" />
     <Compile Include="Networking\Shared\BaseTCPSocket.vb" />
     <Compile Include="Networking\Shared\ConnectedSocket.vb" />

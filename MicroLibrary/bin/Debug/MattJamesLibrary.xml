@@ -22,13 +22,13 @@ MattJamesLibrary
   resource lookups using this strongly typed resource class.
 </summary>
 </member>
-<member name="T:MattJamesLibrary.Networking.Client.ClientTCPSocket">
+<member name="T:MattJamesLibrary.Networking.Client.TcpClient">
  <summary>
  An easy to use, multithreaded TCP client
  </summary>
  <remarks></remarks>
 </member>
-<member name="M:MattJamesLibrary.Networking.Client.ClientTCPSocket.#ctor(MattJamesLibrary.Networking.ISerializationProtocol,System.Int32)">
+<member name="M:MattJamesLibrary.Networking.Client.TcpClient.#ctor(MattJamesLibrary.Networking.ISerializationProtocol,System.Int32)">
  <summary>
  Make a TCP client, binded to a port (if specified). Using IPAddress.Any
  </summary>
@@ -37,28 +37,12 @@ MattJamesLibrary
  See IPEndPoint: http://msdn.microsoft.com/en-us/library/system.net.sockets.socket.bind(v=vs.110).aspx 
  </remarks>
 </member>
-<member name="M:MattJamesLibrary.Networking.Client.ClientTCPSocket.Connect(System.String,System.Int32)">
+<member name="M:MattJamesLibrary.Networking.Client.TcpClient.Connect(System.String,System.Int32)">
  <summary>
  Try to connect to the host and port specified
  </summary>
  <param name="Host">The host you intend to try and connect to (e.g. localhost, 127.0.0.1 etc..)</param>
  <param name="Port">The port the host uses</param>
- <remarks></remarks>
-</member>
-<member name="M:MattJamesLibrary.Networking.Serialization.SerializeObject(System.Object)">
- <summary>
- Serialize an object into bytes using a MemoryStream and BinaryFormatter
- </summary>
- <param name="Obj">The object you want to serialize</param>
- <returns>Byte()</returns>
- <remarks></remarks>
-</member>
-<member name="M:MattJamesLibrary.Networking.Serialization.DeserializeObject(System.Byte[])">
- <summary>
- Deserialize an object from bytes using a MemoryStream and BinaryFormatter
- </summary>
- <param name="Bytes">Bytes to convert into an object</param>
- <returns>Object</returns>
  <remarks></remarks>
 </member>
 <member name="T:MattJamesLibrary.Networking.ISerializationProtocol">
@@ -67,13 +51,13 @@ MattJamesLibrary
  </summary>
  <remarks></remarks>
 </member>
-<member name="T:MattJamesLibrary.Networking.Server.ServerTCPSocket">
+<member name="T:MattJamesLibrary.Networking.Server.TcpServer">
  <summary>
  Creates a multithreaded TCP server with concurrent connections with clients. 
  </summary>
  <remarks></remarks>
 </member>
-<member name="M:MattJamesLibrary.Networking.Server.ServerTCPSocket.Send(System.Net.IPEndPoint,System.Object)">
+<member name="M:MattJamesLibrary.Networking.Server.TcpServer.Send(System.Net.IPEndPoint,System.Object)">
  <summary>
  Send a serializable object with Protocol using an IPEndPoint
  </summary>
@@ -81,7 +65,7 @@ MattJamesLibrary
  <param name="Obj">The object you intend to send</param>
  <remarks></remarks>
 </member>
-<member name="M:MattJamesLibrary.Networking.Server.ServerTCPSocket.SendBroadcast(System.Net.IPEndPoint[],System.Object)">
+<member name="M:MattJamesLibrary.Networking.Server.TcpServer.SendBroadcast(System.Net.IPEndPoint[],System.Object)">
  <summary>
  Send a serializable object with Protocol to an array of connected sockets
  </summary>
@@ -89,7 +73,7 @@ MattJamesLibrary
  <param name="Obj">The object you intend to send</param>
  <remarks></remarks>
 </member>
-<member name="M:MattJamesLibrary.Networking.Server.ServerTCPSocket.Close">
+<member name="M:MattJamesLibrary.Networking.Server.TcpServer.Close">
  <summary>
  Close all connected sockets and close the main listening socket. ConnectedSockets will be cleared.
  </summary>
