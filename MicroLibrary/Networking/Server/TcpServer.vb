@@ -6,7 +6,7 @@ Namespace Networking.Server
     ''' Creates a multithreaded TCP server with concurrent connections with clients. 
     ''' </summary>
     ''' <remarks></remarks>
-    Public Class ServerTCPSocket
+    Public Class TcpServer
         Inherits BaseTCPSocket
         Public Event OnConnected(Sender As Socket)
         Public Event OnNewWait()

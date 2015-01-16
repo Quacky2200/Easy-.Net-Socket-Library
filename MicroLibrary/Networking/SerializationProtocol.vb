@@ -1,6 +1,7 @@
 ﻿Imports System.Reflection
 Imports MsgPack.Serialization
 Imports Newtonsoft.Json.Linq
+Imports System.Linq
 
 Namespace Networking
     ''' <summary>
@@ -42,7 +43,7 @@ Namespace Networking
 
         Private Function ISerializationProtocol_Serialize(Obj As Object) As Byte() Implements ISerializationProtocol.Serialize
             Dim WrapperObject As New DeserializationWrapper(Obj)
-            Return serializer.PackSingleObject(WrapperObject)
+            serializer.PackSingleObject(WrapperObject)
         End Function
 
         Public Function Deserialize(Data As Byte()) As Object Implements ISerializationProtocol.Deserialize
@@ -53,6 +54,10 @@ Namespace Networking
         Public Function GetPropertyValue(PropertyName As String, PropertyIndex As Integer, ByRef ObjectData As Object) As Object Implements ISerializationProtocol.GetPropertyValue
             Dim MsgPackObj As IList(Of MsgPack.MessagePackObject) = DirectCast(ObjectData, MsgPack.MessagePackObject).AsList
             Return MsgPackObj(PropertyIndex).ToObject
+        End Function
+
+        Private Function PackObject(obj As Object) As Object
+
         End Function
     End Class
 
@@ -72,24 +77,33 @@ Namespace Networking
 
         Public Function GetInitializedObject(sender As ISerializationProtocol) As Object
             Dim theType As Type = System.Type.GetType(Type)
-
-            Dim objProperties As PropertyInfo() = theType.GetProperties(BindingFlags.Instance Or BindingFlags.[Public])
             Dim instance As Object = Activator.CreateInstance(theType)
-            Dim index As Integer = 0
-            For Each p As PropertyInfo In objProperties
 
+            DeserializationWrapper.IterateProperties(instance,
+            Sub(p, i)
                 If p.CanWrite Then
                     Try
-                        Dim v = sender.GetPropertyValue(p.Name, index, Data)
+                        Dim v = sender.GetPropertyValue(p.Name, i, Data)
                         p.SetValue(instance, v, Nothing)
                     Catch ex As Exception
 
                     End Try
                 End If
-                index += 1
-            Next
+            End Sub)
+
             Return instance
         End Function
+
+        Public Shared Sub IterateProperties(target As Object, Operation As Action(Of PropertyInfo, Integer))
+            Dim TargetType As Type = target.GetType
+            Dim objProperties As PropertyInfo() = TargetType.GetProperties(BindingFlags.Instance Or BindingFlags.[Public])
+            Dim instance As Object = Activator.CreateInstance(TargetType)
+            Dim index As Integer = 0
+            For Each p As PropertyInfo In objProperties
+                Operation.Invoke(p, index)
+                index += 1
+            Next
+        End Sub
 
     End Class
 

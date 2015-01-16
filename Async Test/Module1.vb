@@ -7,33 +7,33 @@ Imports ProjectZ.Shared
 
 Module Module1
 
-    Dim s As New Stopwatch
+    Dim Benchmarks As New Dictionary(Of String, Long)
+    Dim PrettyPrintDictionary As New Dictionary(Of String, List(Of String))
 
     Dim mEngine As New JsonSerializerEngine
-    Public WithEvents client As New Networking.Client.ClientTCPSocket(mEngine)
+    Public WithEvents client As New Networking.Client.TcpClient(mEngine)
 
-    Public WithEvents server As New Networking.Server.ServerTCPSocket(mEngine, 4237)
+    Public WithEvents server As New Networking.Server.TcpServer(mEngine, 4237)
 
     Private Sub server_OnReceive(sender As Socket, obj As Object, BytesReceived As Integer) Handles server.OnReceive
         Select Case obj.GetType
             Case GetType(Message)
-                s.Stop()
                 Dim M As Message = DirectCast(obj, Message)
-                Console.WriteLine(String.Format("Receive Time {1}.. ( {0} Bytes Received )", BytesReceived, s.Elapsed.ToString))
-                s.Reset()
+                Dim MessageID As String = M.Name
+                Dim Elapsed As TimeSpan = TimeSpan.FromTicks(Stopwatch.GetTimestamp - Benchmarks(M.Name))
+                PrettyPrintDictionary(MessageID).Add(String.Format("    {0} Received, Elapsed {1}", BytesReceived, Elapsed.ToString))
+                PrettyPrintDictionary(MessageID).Add("]")
+                PrettyPrint(MessageID)
         End Select
     End Sub
 
     Sub Main()
         server.Listen(1000)
-
-        s.Start()
-
         client.Connect("127.0.0.1", 4237)
-        s.Stop()
-        Console.WriteLine(String.Format("Initial Connection Time {0}", {s.Elapsed.ToString}))
-        s.Reset()
+
+        Console.WriteLine("Press enter to run benchmark..")
         Console.ReadLine()
+
         Do
             Console.Clear()
             WorkLoop()
@@ -43,26 +43,38 @@ Module Module1
         server.Close()
     End Sub
 
-    Private Sub WorkLoop()
+    Private Async Sub WorkLoop()
+        Dim MsgData As String = GenerateCode(10000)
+        Dim SendAmount As Integer = 4
 
-        s.Start()
-        Dim MSG As New Message(My.Computer.Name, GenerateCode(40005))
-        s.Stop()
-        Console.WriteLine(String.Format("Message Initialization Time {0}", s.Elapsed.ToString))
-        s.Reset()
-
-        For i As Integer = 0 To 0
-            doSend(MSG)
-            System.Threading.Thread.Sleep(15)
+        For i As Integer = 0 To SendAmount - 1
+            Dim MessageID As String = Guid.NewGuid.ToString
+            Dim MSG As New Message(MessageID, MsgData)
+            Dim start As Long = Stopwatch.GetTimestamp
+            Benchmarks.Add(MessageID, start)
+            Dim BytesSent As Integer = Await client.SendTask(MSG)
+            Dim elapsed As TimeSpan = TimeSpan.FromTicks(Stopwatch.GetTimestamp - start)
+            PrettyPrintDictionary.Add(MessageID, New List(Of String))
+            PrettyPrintDictionary(MessageID).Add(String.Format("{0}: [", MessageID))
+            PrettyPrintDictionary(MessageID).Add(String.Format("    {0} Sent, Elapsed {1}", BytesSent, elapsed.ToString))
         Next
 
     End Sub
 
-    Private Async Sub doSend(msg As Message)
-        s.Start()
-        Dim BytesSent As Integer = Await client.SendTask(msg)
-        Console.WriteLine(String.Format("Send Time {1} ( {0} Bytes Sent )", BytesSent, s.Elapsed.ToString))
+    Public Sub PrettyPrint(MessageID As String)
+        Dim AllBlocks As String = Nothing
+        Dim Block As String = String.Join(vbNewLine, PrettyPrintDictionary(MessageID).ToArray) & vbNewLine
+        AllBlocks = String.Join(vbNewLine, {AllBlocks, Block})
+        Console.WriteLine(AllBlocks)
     End Sub
+
+    Public Function DuplicateString(Input As String, Multiples As Integer) As String
+        Dim output As String = Nothing
+        For i As Integer = 0 To Multiples - 1
+            output = Input & output
+        Next
+        Return output
+    End Function
 
     Public Function GenerateCode(Optional ByVal intnamelength As Integer = 10) As String
         Dim intrnd As Object
@@ -81,11 +93,4 @@ Module Module1
         Return strname
     End Function
 
-    Private Sub server_OnError(sender As Socket, e As Exception) Handles server.OnError
-
-    End Sub
-
-    Private Sub server_OnConnectionInterrupt(sender As Socket) Handles server.OnConnectionInterrupt
-
-    End Sub
 End Module
