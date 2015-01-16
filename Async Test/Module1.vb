@@ -44,8 +44,8 @@ Module Module1
     End Sub
 
     Private Async Sub WorkLoop()
-        Dim MsgData As String = GenerateCode(10000)
-        Dim SendAmount As Integer = 4
+        Dim MsgData As String = DuplicateString(GenerateCode(1000), 1000)
+        Dim SendAmount As Integer = 100
 
         For i As Integer = 0 To SendAmount - 1
             Dim MessageID As String = Guid.NewGuid.ToString
