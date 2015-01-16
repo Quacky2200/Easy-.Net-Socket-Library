@@ -7,7 +7,7 @@ Public Module ConsoleTricks
         Return Console.ReadLine
     End Function
     Function GetResponse(str As String) As String
-        GetResponse(str, False)
+        Return GetResponse(str, False)
     End Function
     Sub WaitSec(int As Integer)
         Dim NewSecond As Byte = DateAndTime.TimeOfDay.Second + 5

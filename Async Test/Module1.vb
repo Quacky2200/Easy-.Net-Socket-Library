@@ -1,8 +1,8 @@
 ﻿Imports System.Net.Sockets
 Imports System.Runtime.InteropServices
-Imports MattJamesLibrary
-Imports MattJamesLibrary.Networking
-Imports MattJamesLibrary.Networking.Serializable
+Imports MicroLibrary
+Imports MicroLibrary.Networking
+Imports MicroLibrary.Networking.Serializable
 Imports ProjectZ.Shared
 
 Module Module1
@@ -10,7 +10,7 @@ Module Module1
     Dim Benchmarks As New Dictionary(Of String, Long)
     Dim PrettyPrintDictionary As New Dictionary(Of String, List(Of String))
 
-    Dim mEngine As New JsonSerializerEngine
+    Dim mEngine As New MessagePackSerializerEngine
     Public WithEvents client As New Networking.Client.TcpClient(mEngine)
 
     Public WithEvents server As New Networking.Server.TcpServer(mEngine, 4237)
@@ -52,9 +52,9 @@ Module Module1
             Dim MSG As New Message(MessageID, MsgData)
             Dim start As Long = Stopwatch.GetTimestamp
             Benchmarks.Add(MessageID, start)
+            PrettyPrintDictionary.Add(MessageID, New List(Of String))
             Dim BytesSent As Integer = Await client.SendTask(MSG)
             Dim elapsed As TimeSpan = TimeSpan.FromTicks(Stopwatch.GetTimestamp - start)
-            PrettyPrintDictionary.Add(MessageID, New List(Of String))
             PrettyPrintDictionary(MessageID).Add(String.Format("{0}: [", MessageID))
             PrettyPrintDictionary(MessageID).Add(String.Format("    {0} Sent, Elapsed {1}", BytesSent, elapsed.ToString))
         Next
