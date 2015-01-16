@@ -1,0 +1,30 @@
+c:\users\matt\documents\visual studio 2013\Projects\MattJamesLibrary\MattJamesLibrary\obj\Debug\MattJamesLibrary.Resources.resources
+c:\users\matt\documents\visual studio 2013\Projects\MattJamesLibrary\MattJamesLibrary\obj\Debug\MattJamesLibrary.vbproj.GenerateResource.Cache
+c:\users\matt\documents\visual studio 2013\Projects\MattJamesLibrary\MattJamesLibrary\bin\Debug\MattJamesLibrary.dll
+c:\users\matt\documents\visual studio 2013\Projects\MattJamesLibrary\MattJamesLibrary\bin\Debug\MattJamesLibrary.pdb
+c:\users\matt\documents\visual studio 2013\Projects\MattJamesLibrary\MattJamesLibrary\bin\Debug\MattJamesLibrary.xml
+c:\users\matt\documents\visual studio 2013\Projects\MattJamesLibrary\MattJamesLibrary\obj\Debug\MattJamesLibrary.dll
+c:\users\matt\documents\visual studio 2013\Projects\MattJamesLibrary\MattJamesLibrary\obj\Debug\MattJamesLibrary.xml
+c:\users\matt\documents\visual studio 2013\Projects\MattJamesLibrary\MattJamesLibrary\obj\Debug\MattJamesLibrary.pdb
+C:\Users\Matt\Google Drive\MattJamesLibrary\MattJamesLibrary\bin\Debug\MattJamesLibrary.dll
+C:\Users\Matt\Google Drive\MattJamesLibrary\MattJamesLibrary\bin\Debug\MattJamesLibrary.pdb
+C:\Users\Matt\Google Drive\MattJamesLibrary\MattJamesLibrary\bin\Debug\MattJamesLibrary.xml
+C:\Users\Matt\Google Drive\MattJamesLibrary\MattJamesLibrary\obj\Debug\MattJamesLibrary.Resources.resources
+C:\Users\Matt\Google Drive\MattJamesLibrary\MattJamesLibrary\obj\Debug\MattJamesLibrary.vbproj.GenerateResource.Cache
+C:\Users\Matt\Google Drive\MattJamesLibrary\MattJamesLibrary\obj\Debug\MattJamesLibrary.dll
+C:\Users\Matt\Google Drive\MattJamesLibrary\MattJamesLibrary\obj\Debug\MattJamesLibrary.xml
+C:\Users\Matt\Google Drive\MattJamesLibrary\MattJamesLibrary\obj\Debug\MattJamesLibrary.pdb
+C:\Users\Matt\Google Drive\MattJamesLibrary\MattJamesLibrary\obj\Debug\MattJamesLibrary.vbprojResolveAssemblyReference.cache
+C:\Users\Vinnie\Documents\Visual Studio 2013\Projects\mattjameslibrary\MattJamesLibrary\bin\Debug\MattJamesLibrary.dll
+C:\Users\Vinnie\Documents\Visual Studio 2013\Projects\mattjameslibrary\MattJamesLibrary\bin\Debug\MattJamesLibrary.pdb
+C:\Users\Vinnie\Documents\Visual Studio 2013\Projects\mattjameslibrary\MattJamesLibrary\bin\Debug\MattJamesLibrary.xml
+C:\Users\Vinnie\Documents\Visual Studio 2013\Projects\mattjameslibrary\MattJamesLibrary\obj\Debug\MattJamesLibrary.Resources.resources
+C:\Users\Vinnie\Documents\Visual Studio 2013\Projects\mattjameslibrary\MattJamesLibrary\obj\Debug\MattJamesLibrary.vbproj.GenerateResource.Cache
+C:\Users\Vinnie\Documents\Visual Studio 2013\Projects\mattjameslibrary\MattJamesLibrary\obj\Debug\MattJamesLibrary.dll
+C:\Users\Vinnie\Documents\Visual Studio 2013\Projects\mattjameslibrary\MattJamesLibrary\obj\Debug\MattJamesLibrary.xml
+C:\Users\Vinnie\Documents\Visual Studio 2013\Projects\mattjameslibrary\MattJamesLibrary\obj\Debug\MattJamesLibrary.pdb
+C:\Users\Vinnie\Documents\Visual Studio 2013\Projects\mattjameslibrary\MattJamesLibrary\bin\Debug\Newtonsoft.Json.dll
+C:\Users\Vinnie\Documents\Visual Studio 2013\Projects\mattjameslibrary\MattJamesLibrary\bin\Debug\Newtonsoft.Json.xml
+C:\Users\Vinnie\Documents\Visual Studio 2013\Projects\mattjameslibrary\MattJamesLibrary\bin\Debug\MsgPack.dll
+C:\Users\Vinnie\Documents\Visual Studio 2013\Projects\mattjameslibrary\MattJamesLibrary\bin\Debug\MsgPack.xml
+C:\Users\Vinnie\Documents\Visual Studio 2013\Projects\mattjameslibrary\MattJamesLibrary\obj\Debug\MattJamesLibrary.vbprojResolveAssemblyReference.cache
