@@ -1,0 +1,13 @@
+C:\Users\Matthew\Documents\microlibrary\MicroLibrary\obj\Debug\MicroLibrary.vbprojResolveAssemblyReference.cache
+C:\Users\Matthew\Documents\microlibrary\MicroLibrary\obj\Debug\MicroLibrary.Resources.resources
+C:\Users\Matthew\Documents\microlibrary\MicroLibrary\obj\Debug\MicroLibrary.vbproj.GenerateResource.Cache
+C:\Users\Matthew\Documents\microlibrary\MicroLibrary\bin\Debug\MicroLibrary.dll
+C:\Users\Matthew\Documents\microlibrary\MicroLibrary\bin\Debug\MicroLibrary.pdb
+C:\Users\Matthew\Documents\microlibrary\MicroLibrary\bin\Debug\MicroLibrary.xml
+C:\Users\Matthew\Documents\microlibrary\MicroLibrary\bin\Debug\MsgPack.dll
+C:\Users\Matthew\Documents\microlibrary\MicroLibrary\bin\Debug\Newtonsoft.Json.dll
+C:\Users\Matthew\Documents\microlibrary\MicroLibrary\bin\Debug\MsgPack.xml
+C:\Users\Matthew\Documents\microlibrary\MicroLibrary\bin\Debug\Newtonsoft.Json.xml
+C:\Users\Matthew\Documents\microlibrary\MicroLibrary\obj\Debug\MicroLibrary.dll
+C:\Users\Matthew\Documents\microlibrary\MicroLibrary\obj\Debug\MicroLibrary.xml
+C:\Users\Matthew\Documents\microlibrary\MicroLibrary\obj\Debug\MicroLibrary.pdb
