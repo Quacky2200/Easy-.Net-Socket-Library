@@ -7,7 +7,9 @@ Namespace Networking
     ''' </summary>
     ''' <remarks></remarks>
     Public MustInherit Class BaseTCPSocket
+
         Private MessageCache As New Dictionary(Of String, DeserializationWrapper)
+
         Public Event OnConnectionInterrupt(sender As Socket)
         Public Event OnReceive(sender As Socket, obj As Object, BytesReceived As Integer)
         Public Event OnSent(sender As Socket, BytesSent As Integer)
@@ -15,18 +17,12 @@ Namespace Networking
         Friend Event OnRelease(sender As Socket, senderIP As IPEndPoint)
         'Public Event OnPacketFailure()
 
+        Public Property isPacketFailureRecoveryEnabled As Boolean = True
+
+        Private SendCache As Object() = New Object(10) {}
+        Private CacheIndex As Integer = -1
+
         Private _Port As Integer
-
-#Region ".NET 4.5 Task Implementation"
-
-        Friend Function SendTask(sender As Socket, Obj As Object) As Task(Of Integer)
-            Dim Data As Byte() = PrepareSend(Protocol.Serialize(Obj))
-            Dim t As Task(Of Integer) = Task.Run(Of Integer)(Function() sender.Send(Data, 0, Data.Length, SocketFlags.None))
-            t.Wait()
-            Return t
-        End Function
-
-#End Region
 
         <Serializable>
         Friend Class ObjectResendRequest
@@ -51,7 +47,7 @@ Namespace Networking
         ''' <param name="Protocol">The protocol to use for serializing and deserializing information</param>
         ''' <remarks></remarks>
         Public Sub New(Protocol As ISerializationProtocol, Optional Port As Integer = 0)
-            Me._Port = Port
+            _Port = Port
             BaseSocket = New Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp)
             BaseSocket.ReceiveTimeout = -1
             BaseSocket.SendTimeout = -1
@@ -109,7 +105,7 @@ Namespace Networking
                 state.workSocket = sender
 
                 ' Get the length of the body data transfer. 
-                sender.BeginReceive(state.PaddingBuffer, 0, StateObject.PaddingBufferSize, 0, New AsyncCallback(AddressOf LengthCallback), state)
+                sender.BeginReceive(state.PaddingBuffer, 0, StateObject.PaddingBufferSize, 0, New AsyncCallback(AddressOf PaddingCallback), state)
             Catch ex As SocketException
                 RaiseEvent OnConnectionInterrupt(sender)
             Catch ex As Exception
@@ -117,7 +113,7 @@ Namespace Networking
             End Try
 
         End Sub 'Receive
-        Private Sub LengthCallback(ar As IAsyncResult)
+        Private Sub PaddingCallback(ar As IAsyncResult)
             ' Retrieve the state object and the client socket 
             ' from the asynchronous state object.
             Dim state As StateObject = CType(ar.AsyncState, StateObject)
@@ -125,11 +121,16 @@ Namespace Networking
 
             ' Read the length of the body.
             Dim bytesRead As Integer = client.EndReceive(ar)
-            state.TotalBytesRead += bytesRead + 1
-            state.TotalBytesToRead = CInt(System.Text.UTF8Encoding.UTF8.GetString(state.PaddingBuffer))
+            state.TotalBytesRead += bytesRead
+
+            Dim StringData As String = Text.Encoding.UTF8.GetString(state.PaddingBuffer)
+            Dim BodyLength As Integer = CInt(StringData.Remove(10))
+            Dim MessageID As String = StringData.Remove(0, 10)
+            state.TotalBytesToRead = BodyLength
+            state.ID = MessageID
 
             ' Begin receiving the data from the remote device.
-            client.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0, New AsyncCallback(AddressOf ReceiveCallback), state)
+            DoRecursiveReceive(state)
         End Sub
         Private Sub ReceiveCallback(ar As IAsyncResult)
             ' Retrieve the state object and the client socket 
@@ -144,20 +145,32 @@ Namespace Networking
             state.ObjectData.AddRange(state.buffer)
             state.TotalBytesRead += bytesRead
 
+            DoRecursiveReceive(state)
+
+        End Sub 'ReceiveCallback
+
+        Private Sub DoRecursiveReceive(state As StateObject)
+            Dim client As Socket = state.workSocket
             ' Check if we need more data or have finished the transfer.
             Dim Difference As Integer = state.TotalBytesToRead - state.TotalBytesRead
+
             If Difference < 0 Then
-                'Error Check here
-                Send(client, New ObjectResendRequest())
+                ' Message corrupt
+                If isPacketFailureRecoveryEnabled Then
+                    ' Attempt To Recover
+                    Send(client, New ObjectResendRequest(state.ID))
+                Else
+                    RaiseEvent OnError(client, New SocketException(SocketError.NoRecovery))
+                End If
+
             ElseIf Difference <= StateObject.BufferSize Then
                 ' Done After Next Receive.
-                client.BeginReceive(state.buffer, 0, Difference + 1, 0, New AsyncCallback(AddressOf FinishReceiveCallback), state)
+                client.BeginReceive(state.buffer, 0, Difference, 0, New AsyncCallback(AddressOf FinishReceiveCallback), state)
             Else
                 ' Get the rest of the data.
                 client.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0, New AsyncCallback(AddressOf ReceiveCallback), state)
             End If
-
-        End Sub 'ReceiveCallback
+        End Sub
 
         Private Sub FinishReceiveCallback(ByVal ar As IAsyncResult)
 
@@ -173,21 +186,17 @@ Namespace Networking
             state.ObjectData.AddRange(state.buffer.ToList.GetRange(0, bytesRead))
             state.TotalBytesRead += bytesRead
 
+            Dim data As Object = Protocol.Deserialize(state.ObjectData.ToArray)
+            If Not IsNothing(data) Then
+                RaiseEvent OnReceive(client, data, state.TotalBytesRead)
+            End If
+
             FinishReceiveClean(state)
 
-        End Sub
-        Private Sub FinishReceiveErrorFixPacket(ByRef State As StateObject, ByVal Difference As Integer)
-            State.ObjectData.RemoveRange(State.ObjectData.Count + Difference, Math.Abs(Difference))
-            FinishReceiveClean(State)
         End Sub
         Private Sub FinishReceiveClean(ByRef State As StateObject)
             ' Clean Up
             Dim client As Socket = State.workSocket
-            Dim data As Object = Protocol.Deserialize(State.ObjectData.ToArray)
-            If Not IsNothing(data) Then
-                RaiseEvent OnReceive(client, data, State.TotalBytesRead - 1)
-            End If
-
             State.TotalBytesToRead = 0
             State.TotalBytesRead = 0
             State.buffer = New Byte(StateObject.BufferSize - 1) {}
@@ -197,6 +206,10 @@ Namespace Networking
 
             Receive(client)
         End Sub
+        Private Sub UpdateRecoveryCache(MessageID As String, Data As Byte())
+
+        End Sub
+
         Private Sub SendCallBack(ByVal ar As IAsyncResult)
             ' Retrieve the socket from the state object.
             Dim client As Socket = CType(ar.AsyncState, Socket)
@@ -204,6 +217,7 @@ Namespace Networking
             Dim bytesSent As Integer = client.EndSend(ar)
             'Console.WriteLine("Sent {0} bytes to server.", bytesSent)
             ' Signal that all bytes have been sent.
+
             RaiseEvent OnSent(client, bytesSent)
         End Sub
         Friend Sub Send(sender As Socket, Obj As Object)
@@ -211,8 +225,11 @@ Namespace Networking
         End Sub
         Friend Sub Send(sender As Socket, Bytes() As Byte)
             Try
-                Dim Data As Byte() = PrepareSend(Bytes)
-                sender.BeginSend(Data, 0, Data.Length, SocketFlags.None, AddressOf SendCallBack, sender)
+                Dim RAW As Object() = PrepareSend(Bytes)
+                Dim ObjectData As Byte() = RAW(0)
+                Dim MessageID As String = RAW(1)
+                If isPacketFailureRecoveryEnabled Then UpdateRecoveryCache(MessageID, ObjectData)
+                sender.BeginSend(ObjectData, 0, ObjectData.Length, SocketFlags.None, AddressOf SendCallBack, sender)
             Catch e As Exception
                 If Not IsNothing(sender) And sender.Connected Then
                     RaiseEvent OnConnectionInterrupt(sender)
@@ -222,14 +239,19 @@ Namespace Networking
             End Try
         End Sub
 
-        Private Function PrepareSend(Data As Byte()) As Byte()
-            Dim LengthString As String = (Data.Length + StateObject.PaddingBufferSize).ToString("D10")
-            Dim LengthBytes As Byte() = System.Text.UTF8Encoding.UTF8.GetBytes(LengthString)
-            Dim merged = New Byte(LengthBytes.Length + Data.Length - 2) {}
-            LengthBytes.CopyTo(merged, 0)
-            Data.CopyTo(merged, LengthBytes.Length)
-            Return merged
+        Private Function PrepareSend(Data As Byte()) As Object()
+            Dim PaddingInfo As String = GetPaddingInformation(Data)
+            Dim MessageID As String = PaddingInfo.Substring(10, 32)
+            Dim DataLength As String = PaddingInfo.Substring(0, 10)
+            Dim LengthData As Byte() = Text.Encoding.UTF8.GetBytes(PaddingInfo)
+            Return {CombineByteArrays({LengthData, Data}), MessageID}
         End Function
+
+        Private Function GetPaddingInformation(Data As Byte()) As String
+            Return CInt(Data.Length + StateObject.PaddingBufferSize).ToString("D10") +
+                   (Guid.NewGuid.ToString.Replace("-", ""))
+        End Function
+
         Private Sub CloseSocket(s As Socket)
             RaiseEvent OnRelease(s, s.RemoteEndPoint)
             s.Close()

@@ -1,4 +1,33 @@
-﻿Module Helpers
+﻿Imports System.Runtime.CompilerServices
+Imports System.Threading
+
+Module Helpers
+
+    <Extension>
+    Public Sub IterateByteArray(target As Byte()(), operation As Action(Of Byte()))
+        For Each ByteArray As Byte() In target
+            operation.Invoke(ByteArray)
+        Next
+    End Sub
+
+    <Extension>
+    Public Function GetByteArraySizes(target As Byte()()) As Long
+        Dim Size As Long = 0
+        target.IterateByteArray(Sub(ByteArray) Size += ByteArray.Length)
+        Return Size
+    End Function
+
+    <Extension>
+    Public Function CombineByteArrays(target As Byte()()) As Byte()
+        Dim Size As Long = GetByteArraySizes(target)
+        Dim Merged As Byte() = New Byte(Size - 1) {}
+        Dim Index As Integer = 0
+        For Each ByteArray As Byte() In target
+            ByteArray.CopyTo(Merged, Index)
+            Index += ByteArray.Length
+        Next
+        Return Merged
+    End Function
 
     Public Property PowerUpSounds As New Dictionary(Of Powerup_Type, List(Of String))
 
