@@ -15,9 +15,6 @@
                 Return _CommandAttachment
             End Get
         End Property
-
-        Sub New()
-        End Sub
         Sub New(Command As CommandType, Optional CommandAttachment As Object = Nothing)
             _Command = Command
             _CommandAttachment = CommandAttachment

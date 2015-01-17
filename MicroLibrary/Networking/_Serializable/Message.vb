@@ -3,9 +3,10 @@
     Public Class Message
         Public Property Message As String
         Public Property Name As String
-        Public ReadOnly Property TimeStamp As String = DateTime.Now
+        Public Property TimeStamp As String = DateTime.Now
 
-        Sub New() : End Sub
+        Sub New()
+        End Sub
         Sub New(Name As String, Message As String)
             Me._Message = Message
             Me._Name = Name
