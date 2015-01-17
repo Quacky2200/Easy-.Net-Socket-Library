@@ -7,43 +7,31 @@ Imports MicroLibrary.Networking.Serializable
 
 Module Module1
 
-    Dim Benchmarks As New Dictionary(Of String, Long)
-    Dim PrettyPrintDictionary As New Dictionary(Of String, List(Of String))
+    Dim SerializerEngine As New JsonSerializerEngine
 
-    Dim mEngine As New JsonSerializerEngine
-    Public WithEvents client As New Networking.Client.TcpClient(mEngine)
-
-    Public WithEvents server As New Networking.Server.TcpServer(mEngine, 4237)
+    Public WithEvents client As New Networking.Client.TcpClient(SerializerEngine)
+    Public WithEvents server As New Networking.Server.TcpServer(SerializerEngine, 4237)
 
     Private Sub server_OnReceive(sender As Socket, obj As Object, BytesReceived As Integer) Handles server.OnReceive
         Select Case obj.GetType
             Case GetType(Message)
                 Dim M As Message = DirectCast(obj, Message)
-                Dim MessageID As String = M.Name
-                Dim sw As New Threading.SpinWait
-                Do Until Benchmarks.ContainsKey(M.Name)
-                    sw.SpinOnce()
-                Loop
-                Dim Elapsed As TimeSpan = TimeSpan.FromTicks(Stopwatch.GetTimestamp - Benchmarks(M.Name))
-
-                Do Until PrettyPrintDictionary(MessageID).Count = 2
-                    sw.SpinOnce()
-                Loop
-                PrettyPrintDictionary(MessageID).Add(String.Format("    {0} Received, Elapsed {1}", BytesReceived, Elapsed.ToString))
-                PrettyPrintDictionary(MessageID).Add(String.Format("    '{0}'", M.Message))
-                PrettyPrintDictionary(MessageID).Add("]")
-                PrettyPrint(MessageID)
+                Console.WriteLine("Received Message { " & M.Name & " }")
         End Select
     End Sub
 
     Sub Main()
+        ' Start The Server
         server.Listen(1000)
+
+        ' Connect to the server
         client.Connect("127.0.0.1", 4237)
 
         Console.WriteLine("Press enter to run benchmark..")
         Console.ReadLine()
 
         Do
+            ' Benchmark Work Look
             Console.Clear()
             WorkLoop()
             Console.ReadLine()
@@ -54,7 +42,7 @@ Module Module1
 
     Public Sub WorkLoop()
         Dim MsgData As String = DuplicateString(GenerateCode(1000), 1000)
-        Dim SendAmount As Integer = 100000
+        Dim SendAmount As Integer = 1000
 
 
         For i As Integer = 0 To SendAmount
@@ -62,14 +50,8 @@ Module Module1
             Dim MSG As New Message(MessageID, MsgData)
             Dim start As Long = Stopwatch.GetTimestamp
             Dim List As List(Of String) = New List(Of String)
-            DoUntilWorked(Sub() PrettyPrintDictionary.Add(MessageID, List))
-            DoUntilWorked(Sub() Benchmarks.Add(MessageID, start))
             client.Send(MSG)
-            Dim elapsed As TimeSpan = TimeSpan.FromTicks(Stopwatch.GetTimestamp - start)
-
-            List.Add(MessageID & ": [")
-            List.Add("    Message Sent!")
-
+            Console.WriteLine("Sent Message { " & MessageID & " }")
         Next
 
     End Sub
@@ -85,15 +67,6 @@ Module Module1
                 sw.SpinOnce()
             End Try
         Loop
-    End Sub
-
-    Public Sub PrettyPrint(MessageID As String)
-        Dim AllBlocks As String = Nothing
-        Dim Block As String = String.Join(vbNewLine, PrettyPrintDictionary(MessageID).ToArray) & vbNewLine
-        AllBlocks = AllBlocks & String.Join(vbNewLine, {AllBlocks, Block})
-        Console.WriteLine(AllBlocks)
-        PrettyPrintDictionary.Remove(MessageID)
-        Benchmarks.Remove(MessageID)
     End Sub
 
     Public Function DuplicateString(Input As String, Multiples As Integer) As String
