@@ -45,19 +45,19 @@ Module Module1
 
     Private Async Sub WorkLoop()
         Dim MsgData As String = DuplicateString(GenerateCode(1000), 1000)
-        Dim SendAmount As Integer = 100
+        'Dim SendAmount As Integer = 0
 
-        For i As Integer = 0 To SendAmount - 1
-            Dim MessageID As String = Guid.NewGuid.ToString
-            Dim MSG As New Message(MessageID, MsgData)
-            Dim start As Long = Stopwatch.GetTimestamp
-            Benchmarks.Add(MessageID, start)
-            PrettyPrintDictionary.Add(MessageID, New List(Of String))
-            Dim BytesSent As Integer = Await client.SendTask(MSG)
-            Dim elapsed As TimeSpan = TimeSpan.FromTicks(Stopwatch.GetTimestamp - start)
-            PrettyPrintDictionary(MessageID).Add(String.Format("{0}: [", MessageID))
-            PrettyPrintDictionary(MessageID).Add(String.Format("    {0} Sent, Elapsed {1}", BytesSent, elapsed.ToString))
-        Next
+        'For i As Integer = 0 To SendAmount
+        Dim MessageID As String = Guid.NewGuid.ToString
+        Dim MSG As New Message(MessageID, MsgData)
+        Dim start As Long = Stopwatch.GetTimestamp
+        Benchmarks.Add(MessageID, start)
+        PrettyPrintDictionary.Add(MessageID, New List(Of String))
+        Dim BytesSent As Integer = Await client.SendTask(MSG)
+        Dim elapsed As TimeSpan = TimeSpan.FromTicks(Stopwatch.GetTimestamp - start)
+        PrettyPrintDictionary(MessageID).Add(String.Format("{0}: [", MessageID))
+        PrettyPrintDictionary(MessageID).Add(String.Format("    {0} Sent, Elapsed {1}", BytesSent, elapsed.ToString))
+        'Next
 
     End Sub
 

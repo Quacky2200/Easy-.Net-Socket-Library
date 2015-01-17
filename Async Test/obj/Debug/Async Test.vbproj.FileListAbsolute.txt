@@ -23,7 +23,6 @@ C:\Users\Vinnie\Documents\Visual Studio 2013\Projects\MicroLibrary\Async Test\bi
 C:\Users\Vinnie\Documents\Visual Studio 2013\Projects\MicroLibrary\Async Test\bin\Debug\Async Test.xml
 C:\Users\Vinnie\Documents\Visual Studio 2013\Projects\MicroLibrary\Async Test\bin\Debug\MsgPack.dll
 C:\Users\Vinnie\Documents\Visual Studio 2013\Projects\MicroLibrary\Async Test\bin\Debug\Newtonsoft.Json.dll
-C:\Users\Vinnie\Documents\Visual Studio 2013\Projects\MicroLibrary\Async Test\bin\Debug\MattJamesLibrary.xml
 C:\Users\Vinnie\Documents\Visual Studio 2013\Projects\MicroLibrary\Async Test\bin\Debug\MsgPack.xml
 C:\Users\Vinnie\Documents\Visual Studio 2013\Projects\MicroLibrary\Async Test\obj\Debug\Async_Test.Resources.resources
 C:\Users\Vinnie\Documents\Visual Studio 2013\Projects\MicroLibrary\Async Test\obj\Debug\Async Test.vbproj.GenerateResource.Cache
