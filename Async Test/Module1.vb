@@ -1,5 +1,6 @@
 ﻿Imports System.Net.Sockets
 Imports System.Runtime.InteropServices
+Imports System.Threading
 Imports MicroLibrary
 Imports MicroLibrary.Networking
 Imports MicroLibrary.Networking.Serializable
@@ -9,7 +10,7 @@ Module Module1
     Dim Benchmarks As New Dictionary(Of String, Long)
     Dim PrettyPrintDictionary As New Dictionary(Of String, List(Of String))
 
-    Dim mEngine As New BinaryFormatterSerializerEngine
+    Dim mEngine As New JsonSerializerEngine
     Public WithEvents client As New Networking.Client.TcpClient(mEngine)
 
     Public WithEvents server As New Networking.Server.TcpServer(mEngine, 4237)
@@ -19,19 +20,23 @@ Module Module1
             Case GetType(Message)
                 Dim M As Message = DirectCast(obj, Message)
                 Dim MessageID As String = M.Name
-                Dim Elapsed As TimeSpan = TimeSpan.FromTicks(Stopwatch.GetTimestamp - Benchmarks(M.Name))
                 Dim sw As New Threading.SpinWait
+                Do Until Benchmarks.ContainsKey(M.Name)
+                    sw.SpinOnce()
+                Loop
+                Dim Elapsed As TimeSpan = TimeSpan.FromTicks(Stopwatch.GetTimestamp - Benchmarks(M.Name))
+
                 Do Until PrettyPrintDictionary(MessageID).Count = 2
                     sw.SpinOnce()
                 Loop
                 PrettyPrintDictionary(MessageID).Add(String.Format("    {0} Received, Elapsed {1}", BytesReceived, Elapsed.ToString))
+                PrettyPrintDictionary(MessageID).Add(String.Format("    '{0}'", M.Message))
                 PrettyPrintDictionary(MessageID).Add("]")
                 PrettyPrint(MessageID)
         End Select
     End Sub
 
     Sub Main()
-        Console.WriteLine(Guid.NewGuid.ToString.Replace("-", "").Length)
         server.Listen(1000)
         client.Connect("127.0.0.1", 4237)
 
@@ -47,30 +52,48 @@ Module Module1
         server.Close()
     End Sub
 
-    Private Async Sub WorkLoop()
+    Public Sub WorkLoop()
         Dim MsgData As String = DuplicateString(GenerateCode(1000), 1000)
-        Dim SendAmount As Integer = 1000
+        Dim SendAmount As Integer = 100000
+
 
         For i As Integer = 0 To SendAmount
             Dim MessageID As String = Guid.NewGuid.ToString
             Dim MSG As New Message(MessageID, MsgData)
             Dim start As Long = Stopwatch.GetTimestamp
-            Benchmarks.Add(MessageID, start)
-            PrettyPrintDictionary.Add(MessageID, New List(Of String))
-            Dim BytesSent As Integer = Await client.SendTask(MSG)
+            Dim List As List(Of String) = New List(Of String)
+            DoUntilWorked(Sub() PrettyPrintDictionary.Add(MessageID, List))
+            DoUntilWorked(Sub() Benchmarks.Add(MessageID, start))
+            client.Send(MSG)
             Dim elapsed As TimeSpan = TimeSpan.FromTicks(Stopwatch.GetTimestamp - start)
-            PrettyPrintDictionary(MessageID).Add(String.Format("{0}: [", MessageID))
-            PrettyPrintDictionary(MessageID).Add(String.Format("    {0} Sent, Elapsed {1}", BytesSent, elapsed.ToString))
+
+            List.Add(MessageID & ": [")
+            List.Add("    Message Sent!")
 
         Next
 
     End Sub
 
+    Public Sub DoUntilWorked(ByVal action As Action)
+        Dim sw As New SpinWait
+        Dim worked As Boolean = False
+        Do Until worked
+            Try
+                action.Invoke()
+                worked = True
+            Catch ex As Exception
+                sw.SpinOnce()
+            End Try
+        Loop
+    End Sub
+
     Public Sub PrettyPrint(MessageID As String)
         Dim AllBlocks As String = Nothing
         Dim Block As String = String.Join(vbNewLine, PrettyPrintDictionary(MessageID).ToArray) & vbNewLine
-        AllBlocks = String.Join(vbNewLine, {AllBlocks, Block})
+        AllBlocks = AllBlocks & String.Join(vbNewLine, {AllBlocks, Block})
         Console.WriteLine(AllBlocks)
+        PrettyPrintDictionary.Remove(MessageID)
+        Benchmarks.Remove(MessageID)
     End Sub
 
     Public Function DuplicateString(Input As String, Multiples As Integer) As String

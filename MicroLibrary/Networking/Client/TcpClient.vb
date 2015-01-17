@@ -52,9 +52,6 @@ Namespace Networking.Client
         Public Overloads Sub Send(Obj As Object)
             Send(BaseSocket, Obj)
         End Sub
-        Public Overloads Async Function SendTask(Obj As Object) As Task(Of Integer)
-            Return Await SendTask(BaseSocket, Obj)
-        End Function
 
     End Class
 End Namespace
