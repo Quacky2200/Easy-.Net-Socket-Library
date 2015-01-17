@@ -9,7 +9,7 @@ Module Module1
     Dim Benchmarks As New Dictionary(Of String, Long)
     Dim PrettyPrintDictionary As New Dictionary(Of String, List(Of String))
 
-    Dim mEngine As New MessagePackSerializerEngine
+    Dim mEngine As New JsonSerializerEngine
     Public WithEvents client As New Networking.Client.TcpClient(mEngine)
 
     Public WithEvents server As New Networking.Server.TcpServer(mEngine, 4237)
@@ -20,10 +20,6 @@ Module Module1
                 Dim M As Message = DirectCast(obj, Message)
                 Dim MessageID As String = M.Name
                 Dim Elapsed As TimeSpan = TimeSpan.FromTicks(Stopwatch.GetTimestamp - Benchmarks(M.Name))
-                Dim sw As New Threading.SpinWait
-                Do Until PrettyPrintDictionary(MessageID).Count = 2
-                    sw.SpinOnce()
-                Loop
                 PrettyPrintDictionary(MessageID).Add(String.Format("    {0} Received, Elapsed {1}", BytesReceived, Elapsed.ToString))
                 PrettyPrintDictionary(MessageID).Add("]")
                 PrettyPrint(MessageID)
@@ -48,9 +44,9 @@ Module Module1
 
     Private Async Sub WorkLoop()
         Dim MsgData As String = DuplicateString(GenerateCode(1000), 1000)
-        Dim SendAmount As Integer = 1000
+        Dim SendAmount As Integer = 100
 
-        For i As Integer = 0 To SendAmount
+        For i As Integer = 0 To SendAmount - 1
             Dim MessageID As String = Guid.NewGuid.ToString
             Dim MSG As New Message(MessageID, MsgData)
             Dim start As Long = Stopwatch.GetTimestamp
@@ -60,7 +56,6 @@ Module Module1
             Dim elapsed As TimeSpan = TimeSpan.FromTicks(Stopwatch.GetTimestamp - start)
             PrettyPrintDictionary(MessageID).Add(String.Format("{0}: [", MessageID))
             PrettyPrintDictionary(MessageID).Add(String.Format("    {0} Sent, Elapsed {1}", BytesSent, elapsed.ToString))
-
         Next
 
     End Sub
