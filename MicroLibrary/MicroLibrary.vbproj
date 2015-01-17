@@ -101,7 +101,7 @@
     <Compile Include="Networking\SerializationProtocol.vb" />
     <Compile Include="Networking\Server\TcpServer.vb" />
     <Compile Include="Networking\Server\ServerUDPSocket.vb" />
-    <Compile Include="Networking\Shared\BaseTCPSocket.vb" />
+    <Compile Include="Networking\Shared\BaseTcpSocket.vb" />
     <Compile Include="Networking\Shared\ConnectedSocket.vb" />
     <Compile Include="Networking\_Serializable\Command.vb" />
     <Compile Include="Networking\_Serializable\CommandType.vb" />
