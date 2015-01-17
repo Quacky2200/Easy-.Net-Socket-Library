@@ -3,14 +3,13 @@ Imports System.Runtime.InteropServices
 Imports MicroLibrary
 Imports MicroLibrary.Networking
 Imports MicroLibrary.Networking.Serializable
-Imports ProjectZ.Shared
 
 Module Module1
 
     Dim Benchmarks As New Dictionary(Of String, Long)
     Dim PrettyPrintDictionary As New Dictionary(Of String, List(Of String))
 
-    Dim mEngine As New MessagePackSerializerEngine
+    Dim mEngine As New BinaryFormatterSerializerEngine
     Public WithEvents client As New Networking.Client.TcpClient(mEngine)
 
     Public WithEvents server As New Networking.Server.TcpServer(mEngine, 4237)
@@ -28,6 +27,7 @@ Module Module1
     End Sub
 
     Sub Main()
+        Console.WriteLine(Guid.NewGuid.ToString.Replace("-", "").Length)
         server.Listen(1000)
         client.Connect("127.0.0.1", 4237)
 

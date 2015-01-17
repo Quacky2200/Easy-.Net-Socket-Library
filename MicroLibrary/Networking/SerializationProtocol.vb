@@ -39,6 +39,30 @@ Namespace Networking
         End Function
     End Class
 
+    Public Class BinaryFormatterSerializerEngine
+        Implements ISerializationProtocol
+
+        Public Function Deserialize(Data() As Byte) As Object Implements ISerializationProtocol.Deserialize
+            Dim bfTemp As New Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            Using sStream As New IO.MemoryStream(Data)
+                Dim Obj As Object = bfTemp.Deserialize(sStream, Nothing)
+                Return Obj
+            End Using
+        End Function
+
+        Public Function GetPropertyValue(PropertyName As String, PropertyIndex As Integer, ByRef ObjectData As Object) As Object Implements ISerializationProtocol.GetPropertyValue
+            Return ObjectData(PropertyName)
+        End Function
+
+        Public Function Serialize(Obj As Object) As Byte() Implements ISerializationProtocol.Serialize
+            Dim sStream As New IO.MemoryStream()
+            Dim bfTemp As New Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            bfTemp.AssemblyFormat = Runtime.Serialization.Formatters.FormatterAssemblyStyle.Simple
+            bfTemp.Serialize(sStream, Obj)
+            Return sStream.ToArray
+        End Function
+    End Class
+
     ''' <summary>
     ''' The Message Pack Serializer is faster and slimmer than JSON, but not without limitations. 
     ''' https://github.com/msgpack/msgpack/blob/master/spec.md#limitation
