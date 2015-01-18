@@ -23,3 +23,4 @@ C:\Users\Vinnie\Documents\Visual Studio 2013\Projects\MicroLibrary\MicroLibrary\
 C:\Users\Vinnie\Documents\Visual Studio 2013\Projects\MicroLibrary\MicroLibrary\bin\Debug\Newtonsoft.Json.dll
 C:\Users\Vinnie\Documents\Visual Studio 2013\Projects\MicroLibrary\MicroLibrary\bin\Debug\MsgPack.xml
 C:\Users\Vinnie\Documents\Visual Studio 2013\Projects\MicroLibrary\MicroLibrary\bin\Debug\Newtonsoft.Json.xml
+C:\Users\Vinnie\Documents\Visual Studio 2013\Projects\MicroLibrary\MicroLibrary\obj\Debug\MicroLibrary.vbprojResolveAssemblyReference.cache
