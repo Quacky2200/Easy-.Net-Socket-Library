@@ -51,17 +51,17 @@ MicroLibrary
  </summary>
  <remarks></remarks>
 </member>
-<member name="T:MicroLibrary.Networking.BinaryFormatterSerializerEngine">
+<member name="T:MicroLibrary.Networking.BinaryFormatterSerializer">
  <summary>
  The Default MS BinaryFormatter Serializer Engine. It's Slow and Picky.
  </summary>
 </member>
-<member name="T:MicroLibrary.Networking.JsonSerializerEngine">
+<member name="T:MicroLibrary.Networking.JsonSerializer">
  <summary>
  The JSON serialization engine is slower than MessagePack, but supports a wider range of objects.
  </summary>
 </member>
-<member name="T:MicroLibrary.Networking.MessagePackSerializerEngine">
+<member name="T:MicroLibrary.Networking.MessagePackSerializer">
  <summary>
  The Message Pack Serializer is faster and slimmer than JSON, but not without limitations. 
  https://github.com/msgpack/msgpack/blob/master/spec.md#limitation

@@ -4,6 +4,11 @@ Imports Newtonsoft.Json.Linq
 Imports System.Linq
 
 Namespace Networking
+    Public Module SerializerInstances
+        Public JsonSerializerEngine As New JsonSerializer
+        Public BinaryFormatterSerializerEngine As New BinaryFormatterSerializer
+        Public MessagePackSerializerEngine As New MessagePackSerializer
+    End Module
     ''' <summary>
     ''' This protocol allow methods that deserialize and serialize object to use the same language. 
     ''' </summary>
@@ -19,7 +24,7 @@ Namespace Networking
     ''' <summary>
     ''' The Default MS BinaryFormatter Serializer Engine. It's Slow and Picky.
     ''' </summary>
-    Public Class BinaryFormatterSerializerEngine
+    Public Class BinaryFormatterSerializer
         Implements ISerializationProtocol
 
         Public Function Deserialize(Data() As Byte) As Object Implements ISerializationProtocol.Deserialize
@@ -46,7 +51,7 @@ Namespace Networking
     ''' <summary>
     ''' The JSON serialization engine is slower than MessagePack, but supports a wider range of objects.
     ''' </summary>
-    Public Class JsonSerializerEngine
+    Public Class JsonSerializer
         Implements ISerializationProtocol
 
         Public Function Serialize(obj As Object) As Byte() Implements ISerializationProtocol.Serialize
@@ -70,7 +75,7 @@ Namespace Networking
     ''' The Message Pack Serializer is faster and slimmer than JSON, but not without limitations. 
     ''' https://github.com/msgpack/msgpack/blob/master/spec.md#limitation
     ''' </summary>
-    Public Class MessagePackSerializerEngine
+    Public Class MessagePackSerializer
         Implements ISerializationProtocol
 
         Dim serializer As IMessagePackSingleObjectSerializer = SerializationContext.Default.GetSerializer(Of DeserializationWrapper)
