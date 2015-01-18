@@ -1,0 +1,28 @@
+﻿Namespace Networking.Serializable
+    <Serializable()>
+    Public Class Message
+        Private _Message As String
+        Private _Name As String
+        Private _Timestamp As DateTime
+        Public ReadOnly Property Message As String
+            Get
+                Return _Message
+            End Get
+        End Property
+        Public ReadOnly Property Name As String
+            Get
+                Return _Name
+            End Get
+        End Property
+        Public ReadOnly Property TimeStamp As String
+            Get
+                Return _Timestamp
+            End Get
+        End Property
+        Sub New(Name As String, Message As String)
+            Me._Message = Message
+            Me._Name = Name
+            Me._Timestamp = DateTime.Now
+        End Sub
+    End Class
+End Namespace
