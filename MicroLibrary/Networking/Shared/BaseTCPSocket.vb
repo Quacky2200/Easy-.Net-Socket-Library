@@ -2,39 +2,48 @@
 Imports System.Net.Sockets
 
 Namespace Networking
+    <Serializable>
+    Public Class ObjectTicketRequest
+        Public Property ID As String
+        Sub New()
+
+        End Sub
+        Sub New(ID As String)
+            Me.ID = ID
+        End Sub
+    End Class
     ''' <summary>
     ''' BaseTCPSocket used for ServerTCPSocket and ClientTCPSocket
     ''' </summary>
     ''' <remarks></remarks>
     Public MustInherit Class BaseTCPSocket
-
-        Private MessageCache As New Dictionary(Of String, DeserializationWrapper)
-
         Public Event OnConnectionInterrupt(sender As Socket)
         Public Event OnReceive(sender As Socket, obj As Object, BytesReceived As Integer)
         Public Event OnSent(sender As Socket, BytesSent As Integer)
         Public Event OnError(sender As Socket, e As Exception)
         Friend Event OnRelease(sender As Socket, senderIP As IPEndPoint)
-        'Public Event OnPacketFailure()
 
         Public Property isPacketFailureRecoveryEnabled As Boolean = True
-
-        Private SendCache As Object() = New Object(10) {}
-        Private CacheIndex As Integer = -1
+        ''' <summary>
+        ''' How many different messages should be cached for packet failure. Recommended at around 20-40.
+        ''' </summary>
+        ''' <value></value>
+        ''' <returns></returns>
+        ''' <remarks></remarks>
+        Public Property PacketFailureCacheSize As Integer = 20
+        'Private SendCache As Object() = New Object(10) {}
+        'Private CacheIndex As Integer = -1
 
         Private _Port As Integer
 
-        <Serializable>
-        Friend Class ObjectResendRequest
-            Public Property ID As String
-            Sub New()
-
-            End Sub
-            Sub New(ID As String)
-                Me.ID = ID
+        Friend Class ObjectTicket
+            Public Property ResendRequests As Integer = 0
+            Public Data() As Byte
+            Sub New(Data() As Byte)
+                Me.Data = Data
             End Sub
         End Class
-
+        Private TicketCache As New Dictionary(Of Tuple(Of Socket, String), ObjectTicket)
         ''' <summary>
         ''' The main socket that listens to all requests. Using the TCP protocol.
         ''' </summary>
@@ -158,11 +167,10 @@ Namespace Networking
                 ' Message corrupt
                 If isPacketFailureRecoveryEnabled Then
                     ' Attempt To Recover
-                    Send(client, New ObjectResendRequest(state.ID))
+                    Send(client, New ObjectTicketRequest(state.ID))
                 Else
                     RaiseEvent OnError(client, New SocketException(SocketError.NoRecovery))
                 End If
-
             ElseIf Difference <= StateObject.BufferSize Then
                 ' Done After Next Receive.
                 client.BeginReceive(state.buffer, 0, Difference, 0, New AsyncCallback(AddressOf FinishReceiveCallback), state)
@@ -185,14 +193,36 @@ Namespace Networking
             ' Add temporary buffer data to final output buffer.
             state.ObjectData.AddRange(state.buffer.ToList.GetRange(0, bytesRead))
             state.TotalBytesRead += bytesRead
+            Try
+                Dim data As Object = Protocol.Deserialize(state.ObjectData.ToArray)
+                If Not IsNothing(data) And Not TypeOf (data) Is ObjectTicketRequest Then
 
-            Dim data As Object = Protocol.Deserialize(state.ObjectData.ToArray)
-            If Not IsNothing(data) Then
-                RaiseEvent OnReceive(client, data, state.TotalBytesRead)
-            End If
+                    RaiseEvent OnReceive(client, data, state.TotalBytesRead)
 
+                ElseIf Not IsNothing(data) And TypeOf (data) Is ObjectTicketRequest Then
+                    ResendData(client, data)
+                End If
+            Catch ex As Runtime.Serialization.SerializationException
+                Send(client, New ObjectTicketRequest(state.ID))
+            End Try
             FinishReceiveClean(state)
-
+        End Sub
+        Private Sub ResendData(Sender As Socket, Obj As ObjectTicketRequest)
+            'If we receive a TicketRequest (data failure) 
+            If TicketCache.ContainsKey(New Tuple(Of Socket, String)(Sender, Obj.ID)) Then
+                'If we still have the ticket for this client
+                Dim Ticket As ObjectTicket = TicketCache(New Tuple(Of Socket, String)(Sender, Obj.ID))
+                'and the client has only been resent it less than 3 times
+                If Ticket.ResendRequests < 3 Then
+                    'Resend the data
+                    Ticket.ResendRequests += 1
+                    Send(Sender, Ticket.Data)
+                End If
+                'If the ticket requests are 3 or over, the ticket expires
+                If Ticket.ResendRequests >= 3 Then
+                    TicketCache.Remove(New Tuple(Of Socket, String)(Sender, Obj.ID))
+                End If
+            End If
         End Sub
         Private Sub FinishReceiveClean(ByRef State As StateObject)
             ' Clean Up
@@ -206,8 +236,23 @@ Namespace Networking
 
             Receive(client)
         End Sub
-        Private Sub UpdateRecoveryCache(MessageID As String, Data As Byte())
-
+        Private Sub UpdateRecoveryCache(Client As Socket, MessageID As String, Data As Byte())
+            TicketCache.Add(New Tuple(Of Socket, String)(Client, MessageID), New ObjectTicket(Data))
+            'Add our new ticket
+            Dim DifferentMessageIDs As New List(Of String)
+            For Each item In TicketCache
+                'If the id has not been checked before, add it to our list
+                If Not DifferentMessageIDs.Contains(item.Key.Item2) Then
+                    DifferentMessageIDs.Add(item.Key.Item2)
+                End If
+            Next
+            'If we contain over 10 different messages
+            If DifferentMessageIDs.Count > PacketFailureCacheSize Then
+                For i = 0 To DifferentMessageIDs.Count - PacketFailureCacheSize
+                    TicketCache.Remove(TicketCache.Keys(0))
+                    ' Remove the amount we need to achieve our count back to 10 again from top, as top is the oldest
+                Next
+            End If
         End Sub
 
         Private Sub SendCallBack(ByVal ar As IAsyncResult)
@@ -228,7 +273,7 @@ Namespace Networking
                 Dim RAW As Object() = PrepareSend(Bytes)
                 Dim ObjectData As Byte() = RAW(0)
                 Dim MessageID As String = RAW(1)
-                If isPacketFailureRecoveryEnabled Then UpdateRecoveryCache(MessageID, ObjectData)
+                If isPacketFailureRecoveryEnabled Then UpdateRecoveryCache(sender, MessageID, ObjectData)
                 sender.BeginSend(ObjectData, 0, ObjectData.Length, SocketFlags.None, AddressOf SendCallBack, sender)
             Catch e As Exception
                 If Not IsNothing(sender) And sender.Connected Then

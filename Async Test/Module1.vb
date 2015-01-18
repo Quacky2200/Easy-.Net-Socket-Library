@@ -7,7 +7,7 @@ Imports MicroLibrary.Networking.Serializable
 
 Module Module1
 
-    Dim SerializerEngine As New JsonSerializerEngine
+    Dim SerializerEngine As New MessagePackSerializerEngine
 
     Public WithEvents client As New Networking.Client.TcpClient(SerializerEngine)
     Public WithEvents server As New Networking.Server.TcpServer(SerializerEngine, 4237)
@@ -52,6 +52,7 @@ Module Module1
             Dim List As List(Of String) = New List(Of String)
             client.Send(MSG)
             Console.WriteLine("Sent Message { " & MessageID & " }")
+            Thread.Sleep(10)
         Next
 
     End Sub
