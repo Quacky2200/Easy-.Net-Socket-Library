@@ -7,10 +7,8 @@ Imports MicroLibrary.Networking.Serializable
 
 Module Module1
 
-    Dim SerializerEngine As New JsonSerializerEngine
-
-    Public WithEvents client As New Networking.Client.TcpClient(SerializerEngine)
-    Public WithEvents server As New Networking.Server.TcpServer(SerializerEngine, 4237)
+    Public WithEvents client As New Client.TcpClient(MessagePackSerializerEngine)
+    Public WithEvents server As New Server.TcpServer(MessagePackSerializerEngine, 4237)
 
     Private Sub server_OnReceive(sender As Socket, obj As Object, BytesReceived As Integer) Handles server.OnReceive
         Select Case obj.GetType
