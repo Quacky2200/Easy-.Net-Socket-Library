@@ -1,5 +1,6 @@
 ﻿Imports System.Net
 Imports System.Net.Sockets
+Imports MicroLibrary.Serialization
 
 Namespace Networking.Client
     ''' <summary>
@@ -19,6 +20,8 @@ Namespace Networking.Client
         Sub New(Protocol As ISerializationProtocol, Optional Port As Integer = 0)
             MyBase.New(Protocol, Port)
         End Sub
+
+
         ''' <summary>
         ''' Try to connect to the host and port specified
         ''' </summary>
@@ -26,14 +29,9 @@ Namespace Networking.Client
         ''' <param name="Port">The port the host uses</param>
         ''' <remarks></remarks>
         Public Sub Connect(Host As String, Port As Integer)
-            Dim hostEntry As IPHostEntry = Nothing
-            ' Get host related information.
-            hostEntry = Dns.GetHostEntry(Host)
-            ' Loop through the AddressList to obtain the supported AddressFamily. This is to avoid 
-            ' an exception that occurs when the host host IP Address is not compatible with the address family 
-            ' (typical in the IPv6 case). 
+            Dim hostEntry As IPHostEntry = Dns.GetHostEntry(Host)
             Dim address As IPAddress
-            For Each address In hostEntry.AddressList.Where(Function(x) Not x.ToString.Contains(":")) 'Skip IPv6
+            For Each address In ResolveAllIPv4FromHostEntry(hostEntry)
                 Dim endPoint As New IPEndPoint(address, Port)
                 Try
                     BaseSocket.Connect(endPoint)
@@ -49,6 +47,18 @@ Namespace Networking.Client
                 Throw New Exception("Cannot connect!")
             End If
         End Sub
+
+        Private Function ResolveAllIPv4FromHostEntry(HostEntry As IPHostEntry) As IPAddress()
+            ' Loop through the AddressList to obtain the supported AddressFamily. This is to avoid 
+            ' an exception that occurs when the host host IP Address is not compatible with the address family 
+            ' (typical in the IPv6 case). 
+            Dim IPv4Addresses As New List(Of IPAddress)
+            For Each IP As IPAddress In HostEntry.AddressList
+                If Not IP.ToString.Contains(":") Then IPv4Addresses.Add(IP)
+            Next
+            Return IPv4Addresses.ToArray
+        End Function
+
         Public Overloads Sub Send(Obj As Object)
             Send(BaseSocket, Obj)
         End Sub

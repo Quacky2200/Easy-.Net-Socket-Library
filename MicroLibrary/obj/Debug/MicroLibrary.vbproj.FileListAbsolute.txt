@@ -11,16 +11,17 @@ C:\Users\Matthew\Documents\microlibrary\MicroLibrary\bin\Debug\Newtonsoft.Json.x
 C:\Users\Matthew\Documents\microlibrary\MicroLibrary\obj\Debug\MicroLibrary.dll
 C:\Users\Matthew\Documents\microlibrary\MicroLibrary\obj\Debug\MicroLibrary.xml
 C:\Users\Matthew\Documents\microlibrary\MicroLibrary\obj\Debug\MicroLibrary.pdb
-C:\Users\Vinnie\Documents\Visual Studio 2013\Projects\MicroLibrary\MicroLibrary\obj\Debug\MicroLibrary.Resources.resources
-C:\Users\Vinnie\Documents\Visual Studio 2013\Projects\MicroLibrary\MicroLibrary\obj\Debug\MicroLibrary.vbproj.GenerateResource.Cache
 C:\Users\Vinnie\Documents\Visual Studio 2013\Projects\MicroLibrary\MicroLibrary\obj\Debug\MicroLibrary.dll
 C:\Users\Vinnie\Documents\Visual Studio 2013\Projects\MicroLibrary\MicroLibrary\obj\Debug\MicroLibrary.xml
 C:\Users\Vinnie\Documents\Visual Studio 2013\Projects\MicroLibrary\MicroLibrary\obj\Debug\MicroLibrary.pdb
 C:\Users\Vinnie\Documents\Visual Studio 2013\Projects\MicroLibrary\MicroLibrary\bin\Debug\MicroLibrary.dll
 C:\Users\Vinnie\Documents\Visual Studio 2013\Projects\MicroLibrary\MicroLibrary\bin\Debug\MicroLibrary.pdb
 C:\Users\Vinnie\Documents\Visual Studio 2013\Projects\MicroLibrary\MicroLibrary\bin\Debug\MicroLibrary.xml
-C:\Users\Vinnie\Documents\Visual Studio 2013\Projects\MicroLibrary\MicroLibrary\bin\Debug\MsgPack.dll
-C:\Users\Vinnie\Documents\Visual Studio 2013\Projects\MicroLibrary\MicroLibrary\bin\Debug\Newtonsoft.Json.dll
-C:\Users\Vinnie\Documents\Visual Studio 2013\Projects\MicroLibrary\MicroLibrary\bin\Debug\MsgPack.xml
-C:\Users\Vinnie\Documents\Visual Studio 2013\Projects\MicroLibrary\MicroLibrary\bin\Debug\Newtonsoft.Json.xml
 C:\Users\Vinnie\Documents\Visual Studio 2013\Projects\MicroLibrary\MicroLibrary\obj\Debug\MicroLibrary.vbprojResolveAssemblyReference.cache
+H:\Documents\Visual Studio 2013\Projects\MicroLibrary\MicroLibrary\bin\Debug\MicroLibrary.dll
+H:\Documents\Visual Studio 2013\Projects\MicroLibrary\MicroLibrary\bin\Debug\MicroLibrary.pdb
+H:\Documents\Visual Studio 2013\Projects\MicroLibrary\MicroLibrary\bin\Debug\MicroLibrary.xml
+H:\Documents\Visual Studio 2013\Projects\MicroLibrary\MicroLibrary\obj\Debug\MicroLibrary.vbprojResolveAssemblyReference.cache
+H:\Documents\Visual Studio 2013\Projects\MicroLibrary\MicroLibrary\obj\Debug\MicroLibrary.dll
+H:\Documents\Visual Studio 2013\Projects\MicroLibrary\MicroLibrary\obj\Debug\MicroLibrary.xml
+H:\Documents\Visual Studio 2013\Projects\MicroLibrary\MicroLibrary\obj\Debug\MicroLibrary.pdb

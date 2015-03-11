@@ -1,5 +1,6 @@
 ﻿Imports System.Net
 Imports System.Net.Sockets
+Imports MicroLibrary.Serialization
 
 Namespace Networking.Server
 

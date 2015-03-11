@@ -3,11 +3,23 @@ Imports System.Runtime.InteropServices
 Imports System.Threading
 Imports MicroLibrary
 Imports MicroLibrary.Networking
-Imports MicroLibrary.Networking.Serializable
+Imports MicroLibrary.Serialization
+
+<Serializable>
+Public Class Message
+    Public Property Name As String
+    Public Property Message As String
+    Sub New()
+    End Sub
+    Sub New(Name As String, Message As String)
+        Me.Name = Name
+        Me.Message = Message
+    End Sub
+End Class
 
 Module Module1
 
-    Dim SerializerEngine As New MessagePackSerializerEngine
+    Dim SerializerEngine As ISerializationProtocol = New MessagePackSerializer
 
     Public WithEvents client As New Networking.Client.TcpClient(SerializerEngine)
     Public WithEvents server As New Networking.Server.TcpServer(SerializerEngine, 4237)
@@ -21,6 +33,16 @@ Module Module1
     End Sub
 
     Sub Main()
+        Dim sw As New Stopwatch
+        'Dim sw As New ImprovedSpinWait
+        sw.Start()
+        Dim start As Long = Stopwatch.GetTimestamp()
+        'System.Threading.Thread.Sleep(1000)
+        ImprovedSpinWait.SpinFor(1000.0F)
+        Dim [end] As Long = Stopwatch.GetTimestamp
+        sw.Stop()
+        Console.WriteLine(TimeSpan.FromTicks([end] - start).TotalSeconds)
+        Console.WriteLine(sw.Elapsed.TotalSeconds)
         ' Start The Server
         server.Listen(1000)
 
@@ -43,7 +65,6 @@ Module Module1
     Public Sub WorkLoop()
         Dim MsgData As String = DuplicateString(GenerateCode(1000), 1000)
         Dim SendAmount As Integer = 1000
-
 
         For i As Integer = 0 To SendAmount
             Dim MessageID As String = Guid.NewGuid.ToString
