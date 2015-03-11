@@ -1,5 +1,6 @@
 ﻿Imports System.Net
 Imports System.Net.Sockets
+Imports MicroLibrary.Serialization
 
 Namespace Networking
     <Serializable>
@@ -44,6 +45,7 @@ Namespace Networking
             End Sub
         End Class
         Private TicketCache As New Dictionary(Of Tuple(Of Socket, String), ObjectTicket)
+
         ''' <summary>
         ''' The main socket that listens to all requests. Using the TCP protocol.
         ''' </summary>
@@ -191,7 +193,8 @@ Namespace Networking
             Dim bytesRead As Integer = client.EndReceive(ar)
 
             ' Add temporary buffer data to final output buffer.
-            state.ObjectData.AddRange(state.buffer.ToList.GetRange(0, bytesRead))
+            Dim BufferArrayList As New List(Of Byte)(state.buffer)
+            state.ObjectData.AddRange(BufferArrayList.GetRange(0, bytesRead))
             state.TotalBytesRead += bytesRead
             Try
                 Dim data As Object = Protocol.Deserialize(state.ObjectData.ToArray)
@@ -249,12 +252,24 @@ Namespace Networking
             'If we contain over 10 different messages
             If DifferentMessageIDs.Count > PacketFailureCacheSize Then
                 For i = 0 To DifferentMessageIDs.Count - PacketFailureCacheSize
+
+#If NET20 Then
+                    TicketCache.Remove(GetFirstTicketKey)
+#Else
                     TicketCache.Remove(TicketCache.Keys(0))
+#End If
                     ' Remove the amount we need to achieve our count back to 10 again from top, as top is the oldest
                 Next
             End If
         End Sub
-
+#If NET20 Then
+        Private Function GetFirstTicketKey() As Tuple(Of Socket, String)
+            For Each Key As Tuple(Of Socket, String) In TicketCache.Keys
+                Return Key
+            Next
+            Return Nothing
+        End Function
+#End If
         Private Sub SendCallBack(ByVal ar As IAsyncResult)
             ' Retrieve the socket from the state object.
             Dim client As Socket = CType(ar.AsyncState, Socket)
@@ -289,7 +304,7 @@ Namespace Networking
             Dim MessageID As String = PaddingInfo.Substring(10, 32)
             Dim DataLength As String = PaddingInfo.Substring(0, 10)
             Dim LengthData As Byte() = Text.Encoding.UTF8.GetBytes(PaddingInfo)
-            Return {CombineByteArrays({LengthData, Data}), MessageID}
+            Return {Helpers.CombineByteArrays({LengthData, Data}), MessageID}
         End Function
 
         Private Function GetPaddingInformation(Data As Byte()) As String

@@ -49,6 +49,12 @@
     <Reference Include="MicroLibrary">
       <HintPath>..\MicroLibrary\bin\Debug\MicroLibrary.dll</HintPath>
     </Reference>
+    <Reference Include="MicroLibrary.JSON">
+      <HintPath>..\MicroLibrary.JSON\bin\Debug\MicroLibrary.JSON.dll</HintPath>
+    </Reference>
+    <Reference Include="MicroLibrary.MessagePack">
+      <HintPath>..\MicroLibrary.MessagePack\bin\Debug\MicroLibrary.MessagePack.dll</HintPath>
+    </Reference>
     <Reference Include="MsgPack">
       <HintPath>..\packages\MsgPack.Cli.0.5.7\lib\net45\MsgPack.dll</HintPath>
     </Reference>

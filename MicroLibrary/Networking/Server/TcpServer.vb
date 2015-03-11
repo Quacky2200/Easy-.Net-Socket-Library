@@ -1,5 +1,6 @@
 ﻿Imports System.Net
 Imports System.Net.Sockets
+Imports MicroLibrary.Serialization
 
 Namespace Networking.Server
     ''' <summary>
@@ -56,7 +57,17 @@ Namespace Networking.Server
             Next
         End Sub
         Public Sub SendBroadcast(Obj As Object)
+            ' TODO:
+            ' Needs to be changed to cached method to save processing time on large scale servers.
+#If NET20 Then
+            Dim Keys As New List(Of IPEndPoint)
+            For Each Key As IPEndPoint In Keys
+                Keys.Add(Key)
+            Next
+            SendBroadcast(Keys.ToArray, Obj)
+#Else
             SendBroadcast(ConnectedSockets.Keys.ToArray, Obj)
+#End If
         End Sub
         ''' <summary>
         ''' Close all connected sockets and close the main listening socket. ConnectedSockets will be cleared.

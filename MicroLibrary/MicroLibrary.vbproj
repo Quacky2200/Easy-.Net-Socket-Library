@@ -20,6 +20,7 @@
     <OutputPath>bin\Debug\</OutputPath>
     <DocumentationFile>MicroLibrary.xml</DocumentationFile>
     <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
+    <DefineConstants>NET20=false,NET30=false,NET35=false,NET40=false,NET45=true,NET46=false</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -46,13 +47,7 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="MsgPack">
-      <HintPath>..\packages\MsgPack.Cli.0.5.7\lib\net45\MsgPack.dll</HintPath>
-    </Reference>
-    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Newtonsoft.Json.6.0.8\lib\net45\Newtonsoft.Json.dll</HintPath>
-    </Reference>
+    <Reference Include="Microsoft.VisualStudio.Threading, Version=12.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Data.Linq" />
@@ -80,55 +75,25 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Components.vb" />
-    <Compile Include="Modules\Console.vb" />
-    <Compile Include="Modules\Helpers.vb" />
+    <Compile Include="Helpers.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />
     <Compile Include="My Project\Application.Designer.vb">
       <AutoGen>True</AutoGen>
       <DependentUpon>Application.myapp</DependentUpon>
     </Compile>
-    <Compile Include="My Project\Resources.Designer.vb">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
-    <Compile Include="My Project\Settings.Designer.vb">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Settings.settings</DependentUpon>
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-    </Compile>
     <Compile Include="Networking\Client\TcpClient.vb" />
-    <Compile Include="Networking\SerializationProtocol.vb" />
+    <Compile Include="Serialization\DeserializationWrapper.vb" />
+    <Compile Include="Serialization\ISerializationProtocol.vb" />
     <Compile Include="Networking\Server\TcpServer.vb" />
     <Compile Include="Networking\Server\ServerUDPSocket.vb" />
     <Compile Include="Networking\Shared\BaseTcpSocket.vb" />
     <Compile Include="Networking\Shared\ConnectedSocket.vb" />
-    <Compile Include="Networking\_Serializable\Command.vb" />
-    <Compile Include="Networking\_Serializable\CommandType.vb" />
-    <Compile Include="Networking\_Serializable\FileObject.vb" />
-    <Compile Include="Networking\_Serializable\Message.vb" />
-    <Compile Include="Zombies\CharacterInfo.vb" />
-    <Compile Include="Zombies\CharacterRefreshRate.vb" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="My Project\Resources.resx">
-      <Generator>VbMyResourcesResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.vb</LastGenOutput>
-      <CustomToolNamespace>My.Resources</CustomToolNamespace>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <None Include="My Project\Application.myapp">
       <Generator>MyApplicationCodeGenerator</Generator>
       <LastGenOutput>Application.Designer.vb</LastGenOutput>
     </None>
-    <None Include="My Project\Settings.settings">
-      <Generator>SettingsSingleFileGenerator</Generator>
-      <CustomToolNamespace>My</CustomToolNamespace>
-      <LastGenOutput>Settings.Designer.vb</LastGenOutput>
-    </None>
-    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
